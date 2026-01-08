@@ -1,65 +1,281 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect } from "react";
+import { BookOpen, Sparkles, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { toast } from "sonner";
+import { HomeworkResponse } from "@/components/homework-response";
+import { Header } from "@/components/header";
+import { Sidebar } from "@/components/ui/sidebar";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+
+// Type definitions
+interface HomeworkResponseData {
+  success: boolean;
+  response: string;
+  sections: {
+    understanding?: string;
+    concepts?: string;
+    solution?: string;
+    answer?: string;
+    practice?: string;
+  };
+}
+
+const SUBJECTS = [
+  { value: "math", label: "Math 🔢", icon: "📐" },
+  { value: "science", label: "Science 🧪", icon: "🔬" },
+  { value: "english", label: "English 📚", icon: "✍️" },
+  { value: "history", label: "History 🏛️", icon: "🌍" },
+  { value: "foreign-language", label: "Foreign Language 🌎", icon: "🗣️" },
+  { value: "computer-science", label: "Computer Science 💻", icon: "🖥️" },
+  { value: "other", label: "Other 🎯", icon: "📖" },
+];
 
 export default function Home() {
+  const [subject, setSubject] = useState("");
+  const [question, setQuestion] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState<HomeworkResponseData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    getUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!subject || !question.trim()) {
+      toast.error("Please select a subject and enter your question!");
+      return;
+    }
+
+    setLoading(true);
+    setResponse(null);
+
+    try {
+      const res = await fetch("/api/help", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, question }),
+      });
+
+      if (!res.ok) throw new Error("Failed to get help");
+
+      const data = await res.json();
+      setResponse(data);
+      toast.success("Got your help! 🎉");
+
+      // Show a toast if user is not signed in
+      if (!user) {
+        setTimeout(() => {
+          toast.info("Sign in to save your homework history!", {
+            action: {
+              label: "Sign In",
+              onClick: () => (window.location.href = "/auth/signin"),
+            },
+          });
+        }, 1000);
+      }
+    } catch (error) {
+      toast.error("Oops! Something went wrong. Try again!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = () => {
+    setResponse(null);
+    setQuestion("");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
+      {/* Sidebar - Fixed on desktop, hidden on mobile */}
+      <Sidebar user={user} />
+
+      {/* Main content - Pushed right on desktop */}
+      <div className="flex-1 flex flex-col md:ml-64">
+        <Header user={user} />
+
+        {/* Main Content */}
+        <main className="flex-1 container mx-auto px-4 py-8 max-w-4xl">
+          {!response ? (
+            <div className="space-y-6">
+              {/* Welcome Card */}
+              <Card className="border-2 border-purple-200 shadow-lg">
+                <CardHeader className="text-center">
+                  <div className="flex justify-center mb-4">
+                    <div className="bg-gradient-to-br from-yellow-400 to-orange-400 p-4 rounded-full animate-bounce-slow">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-3xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Need Help with Homework?
+                  </CardTitle>
+                  <CardDescription className="text-base mt-2">
+                    I&apos;ll help you understand the problem step-by-step and
+                    give you practice problems too!
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+
+              {/* Input Form */}
+              <Card className="border-2 border-blue-200 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <BookOpen className="w-5 h-5 text-blue-500" />
+                    What do you need help with?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Subject Select */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        Pick your subject:
+                      </label>
+                      <Select value={subject} onValueChange={setSubject}>
+                        <SelectTrigger className="w-full h-12 text-base border-2">
+                          <SelectValue placeholder="Choose a subject..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBJECTS.map((subj) => (
+                            <SelectItem
+                              key={subj.value}
+                              value={subj.value}
+                              className="text-base"
+                            >
+                              <span className="flex items-center gap-2">
+                                <span>{subj.icon}</span>
+                                <span>{subj.label}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Question Input */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        What&apos;s your question or problem?
+                      </label>
+                      <Textarea
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        placeholder="Example: Solve for x: 2x + 5 = 13&#10;&#10;Or paste multiple problems here!"
+                        className="min-h-32 text-base border-2 resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-12 text-base bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg"
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                          Getting your help...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          Get Help! <ChevronRight className="w-5 h-5" />
+                        </span>
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Features */}
+              <div className="grid md:grid-cols-3 gap-4">
+                <Card className="border-2 border-green-200 bg-green-50/50">
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl mb-2">📝</div>
+                    <h3 className="font-semibold text-green-900 mb-1">
+                      Step-by-Step
+                    </h3>
+                    <p className="text-sm text-green-700">
+                      Learn how to solve it yourself
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-blue-200 bg-blue-50/50">
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl mb-2">💡</div>
+                    <h3 className="font-semibold text-blue-900 mb-1">
+                      Clear Explanations
+                    </h3>
+                    <p className="text-sm text-blue-700">
+                      Understand the concepts
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="border-2 border-orange-200 bg-orange-50/50">
+                  <CardContent className="pt-6 text-center">
+                    <div className="text-3xl mb-2">🎯</div>
+                    <h3 className="font-semibold text-orange-900 mb-1">
+                      Practice Problems
+                    </h3>
+                    <p className="text-sm text-orange-700">
+                      Reinforce what you learned
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <HomeworkResponse
+              response={response}
+              onReset={handleReset}
+              subject={subject}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          )}
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t bg-white/80 backdrop-blur-sm mt-auto py-6">
+          <div className="container mx-auto px-4 text-center text-sm text-gray-600">
+            <p>Remember: Learning is a journey, not a race! 🌟</p>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
