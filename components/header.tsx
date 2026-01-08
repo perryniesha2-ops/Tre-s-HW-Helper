@@ -44,7 +44,7 @@ export function Header({ user }: HeaderProps) {
   };
 
   return (
-    <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+    <header className="border-b bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm sticky top-0 z-10">
       <div className="flex items-center justify-between px-4 py-4 md:px-6">
         {/* Mobile menu and logo (visible on mobile only) */}
         <div className="flex items-center gap-3 md:hidden">
@@ -53,7 +53,7 @@ export function Header({ user }: HeaderProps) {
             <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
               Homework Helper
             </span>
           </Link>
@@ -71,28 +71,31 @@ export function Header({ user }: HeaderProps) {
                   variant="ghost"
                   className="relative h-10 w-10 rounded-full"
                 >
-                  <Avatar className="h-10 w-10 border-2 border-purple-300">
+                  <Avatar className="h-10 w-10 border-2 border-purple-300 dark:border-purple-700">
                     <AvatarFallback className="bg-gradient-to-br from-purple-400 to-pink-400 text-white font-semibold">
                       {getInitials(user.user_metadata?.name || user.email)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end">
+              <DropdownMenuContent
+                className="w-56 bg-white dark:bg-gray-800"
+                align="end"
+              >
                 <DropdownMenuLabel>
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                    <p className="text-sm font-medium leading-none dark:text-gray-100">
                       {user.user_metadata?.name || "Student"}
                     </p>
-                    <p className="text-xs leading-none text-muted-foreground">
+                    <p className="text-xs leading-none text-muted-foreground dark:text-gray-400">
                       {user.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
+                <DropdownMenuSeparator className="dark:bg-gray-700" />
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="cursor-pointer"
+                  className="cursor-pointer dark:hover:bg-gray-700"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
@@ -101,7 +104,11 @@ export function Header({ user }: HeaderProps) {
             </DropdownMenu>
           ) : (
             <div className="flex gap-2">
-              <Button variant="outline" asChild>
+              <Button
+                variant="outline"
+                asChild
+                className="dark:border-gray-700 dark:hover:bg-gray-800"
+              >
                 <Link href="/auth/signin">Sign In</Link>
               </Button>
               <Button
