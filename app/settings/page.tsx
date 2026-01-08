@@ -22,7 +22,7 @@ export default async function SettingsPage() {
     .single();
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20">
       <Sidebar user={user} />
       <div className="flex-1 md:ml-64">
         <Header user={user} />
