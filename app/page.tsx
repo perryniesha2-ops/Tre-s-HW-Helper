@@ -162,7 +162,64 @@ export default function Home() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* ... rest of form stays the same ... */}
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Subject Select */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        Pick your subject:
+                      </label>
+                      <Select value={subject} onValueChange={setSubject}>
+                        <SelectTrigger className="w-full h-12 text-base border-2">
+                          <SelectValue placeholder="Choose a subject..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBJECTS.map((subj) => (
+                            <SelectItem
+                              key={subj.value}
+                              value={subj.value}
+                              className="text-base"
+                            >
+                              <span className="flex items-center gap-2">
+                                <span>{subj.icon}</span>
+                                <span>{subj.label}</span>
+                              </span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Question Input */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium flex items-center gap-2">
+                        What&apos;s your question or problem?
+                      </label>
+                      <Textarea
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        placeholder="Example: Solve for x: 2x + 5 = 13&#10;&#10;Or paste multiple problems here!"
+                        className="min-h-32 text-base border-2 resize-none"
+                      />
+                    </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-12 text-base bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg"
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                          Getting your help...
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          Get Help! <ChevronRight className="w-5 h-5" />
+                        </span>
+                      )}
+                    </Button>
+                  </form>{" "}
                 </CardContent>
               </Card>
 
