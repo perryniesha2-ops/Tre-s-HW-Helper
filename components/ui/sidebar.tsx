@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { User } from "@supabase/supabase-js";
+import { useUser } from "@/components/user-provider";
 
 const navigationItems = [
   {
@@ -30,7 +31,8 @@ interface SidebarProps {
   user?: User | null;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar() {
+  const { user } = useUser();
   const pathname = usePathname();
 
   return (

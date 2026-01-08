@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { Brain, User, LogOut } from "lucide-react";
+import { Brain, LogOut } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,14 +15,11 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { MobileNav } from "@/components/mobile-nav";
+import { useUser } from "@/components/user-provider";
 
-interface HeaderProps {
-  user?: SupabaseUser | null;
-}
-
-export function Header({ user }: HeaderProps) {
+export function Header() {
+  const { user } = useUser();
   const router = useRouter();
   const supabase = createClient();
 
@@ -48,13 +45,13 @@ export function Header({ user }: HeaderProps) {
       <div className="flex items-center justify-between px-4 py-4 md:px-6">
         {/* Mobile menu and logo (visible on mobile only) */}
         <div className="flex items-center gap-3 md:hidden">
-          {user && <MobileNav user={user} />}
+          {user && <MobileNav />}
           <Link href="/" className="flex items-center gap-2">
             <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
               <Brain className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-400 dark:to-pink-400 bg-clip-text text-transparent">
-              Homework Helper
+              Emri
             </span>
           </Link>
         </div>

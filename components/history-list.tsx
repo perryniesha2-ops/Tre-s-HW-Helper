@@ -122,8 +122,9 @@ export function HistoryList({ sessions: initialSessions }: HistoryListProps) {
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
             Your Homework History
           </h1>
-          <p className="text-gray-600">
-            Review your past homework sessions and answers
+          <h3 className="text-xl font-semibold mb-2">No History Yet</h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Your learning sessions with Emri will appear here!
           </p>
         </div>
 

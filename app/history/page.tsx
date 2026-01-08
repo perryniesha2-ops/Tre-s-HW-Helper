@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/header";
 import { HistoryList } from "@/components/history-list";
 import { Sidebar } from "@/components/ui/sidebar";
+import { UserProvider } from "@/components/user-provider";
 
 export default async function HistoryPage() {
   const supabase = await createClient();
@@ -25,14 +26,16 @@ export default async function HistoryPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20">
-      <Sidebar user={user} />
-      <div className="flex-1 md:ml-64">
-        <Header user={user} />
-        <main className="container mx-auto px-4 py-8 max-w-6xl">
-          <HistoryList sessions={sessions || []} />
-        </main>
+    <UserProvider initialUser={user}>
+      <div className="flex min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-blue-900/20">
+        <Sidebar />
+        <div className="flex-1 md:ml-64">
+          <Header />
+          <main className="container mx-auto px-4 py-8 max-w-6xl">
+            <HistoryList sessions={sessions || []} />
+          </main>
+        </div>
       </div>
-    </div>
+    </UserProvider>
   );
 }
